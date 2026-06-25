@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cal_scanner/app_widgets/buttons/back_button.dart';
 import 'package:cal_scanner/core/extensions/capital_first_extension.dart';
 import 'package:cal_scanner/core/extensions/context_extension.dart';
@@ -64,13 +65,28 @@ class MealDetailScreen extends StatelessWidget {
       child: Column(
         children: [
           if (meal.imageUrl != null)
+            // ponytail: use CachedNetworkImage instead of Image.network for local caching and performance [ceiling: minor] [upgrade: none]
             ClipRRect(
               borderRadius: BorderRadius.circular(12.0),
-              child: Image.network(
-                meal.imageUrl!,
+              child: CachedNetworkImage(
+                imageUrl: meal.imageUrl!,
                 height: 180,
                 width: double.infinity,
                 fit: BoxFit.cover,
+                placeholder: (context, url) => Container(
+                  height: 180,
+                  width: double.infinity,
+                  color: Colors.grey[200],
+                  child: const Center(
+                    child: CircularProgressIndicator(),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  height: 180,
+                  width: double.infinity,
+                  color: Colors.grey[200],
+                  child: const Icon(Icons.error, color: Colors.red),
+                ),
               ),
             ),
           if (meal.imageUrl != null) const SizedBox(height: 24),

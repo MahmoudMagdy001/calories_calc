@@ -96,17 +96,26 @@ class _WeekDatePickerState extends State<WeekDatePicker> {
     final dateColor = AppColors.kOrange;
     final today = DateTime.now();
 
-    return BlocBuilder<WeekDatePickerCubit, WeekDatePickerState>(
-      bloc: _cubit,
-      builder: (context, state) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
+    // ponytail: split BlocBuilder into targeted rebuilds to avoid list view rebuilds while scrolling [ceiling: minor] [upgrade: none]
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        BlocBuilder<WeekDatePickerCubit, WeekDatePickerState>(
+          bloc: _cubit,
+          buildWhen: (previous, current) =>
+              previous.visibleMonthDate != current.visibleMonthDate,
+          builder: (context, state) => Text(
             _monthYearLabel(state.visibleMonthDate),
             style: AppTypography.headlineSmall.copyWith(color: dateColor),
           ).paddingOnly(left: 20),
+        ),
 
-          SizedBox(
+        BlocBuilder<WeekDatePickerCubit, WeekDatePickerState>(
+          bloc: _cubit,
+          buildWhen: (previous, current) =>
+              previous.selectedDate != current.selectedDate ||
+              previous.dates != current.dates,
+          builder: (context, state) => SizedBox(
             height: 60.h,
             child: ListView.builder(
               padding: pagePadding,
@@ -170,8 +179,8 @@ class _WeekDatePickerState extends State<WeekDatePicker> {
               },
             ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
